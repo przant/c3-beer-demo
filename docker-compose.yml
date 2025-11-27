@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: c3demo2024
     volumes:
       # Mount the CSV file so PostgreSQL can load it
-      - ./dataset/beers.csv:/docker-entrypoint-initdb.d/beers.csv:ro
+      - ./dataset/beers.csv:/docker-entrypoint-initdb.d/beers.csv:Z
       # Persist database data between runs
       - beer-data:/var/lib/postgresql/data
     ports:
