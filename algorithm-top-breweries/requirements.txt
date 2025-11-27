@@ -1,0 +1,2 @@
+# No additional requirements needed
+# psycopg2-binary and pandas are already installed in base-python image

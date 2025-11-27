@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database with beer data
+  database:
+    build: ./database
+    container_name: c3-beer-database
+    environment:
+      POSTGRES_DB: beers_db
+      POSTGRES_USER: researcher
+      POSTGRES_PASSWORD: c3demo2024
+    volumes:
+      # Mount the CSV file so PostgreSQL can load it
+      - ./dataset/beers.csv:/docker-entrypoint-initdb.d/beers.csv:ro
+      # Persist database data between runs
+      - beer-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U researcher -d beers_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Algorithm: Calculate average ABV by style
+  # Uncomment this service to run this analysis
+  avg-abv:
+    build: ./algorithm-avg-abv
+    container_name: c3-beer-avg-abv
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      DB_HOST: database
+      POSTGRES_DB: beers_db
+      POSTGRES_USER: researcher
+      POSTGRES_PASSWORD: c3demo2024
+
+  # Algorithm: Find top breweries by beer count
+  # Comment out avg-abv above and uncomment this to run different analysis
+  # top-breweries:
+  #   build: ./algorithm-top-breweries
+  #   container_name: c3-beer-top-breweries
+  #   depends_on:
+  #     database:
+  #       condition: service_healthy
+  #   environment:
+  #     DB_HOST: database
+  #     POSTGRES_DB: beers_db
+  #     POSTGRES_USER: researcher
+  #     POSTGRES_PASSWORD: c3demo2024
+
+volumes:
+  beer-data:
+    name: c3-beer-data
